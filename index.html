@@ -1,320 +1,916 @@
-<!doctype html>
-
-<html lang="zh-CN">
+<!DOCTYPE html><html lang="zh-CN">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>弱视斜视训练打卡</title>
-  <meta name="theme-color" content="#f6efe7" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>PPPD 前庭训练打卡</title>
   <style>
     :root {
-      --bg: #f7f2ec;
-      --card: #fffaf6;
-      --text: #2b2521;
-      --muted: #7b6c62;
-      --line: #e3d6ca;
-      --main: #9b6a4d;
-      --main-dark: #754a34;
-      --soft: #f0e4d9;
-      --green-bg: #edf6ef;
-      --green-line: #c7dfcc;
-      --yellow-bg: #fff4dd;
-      --yellow-line: #e7c994;
-      --red-bg: #fff1ea;
-      --red-line: #e8c5b7;
-      --shadow: 0 14px 34px rgba(81, 56, 40, .11);
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --primary: #64748b;
+      --primary-dark: #475569;
+      --soft: #eef2ff;
+      --green: #10b981;
+      --yellow: #f59e0b;
+      --red: #ef4444;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
       --radius: 22px;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top left, #fff8ef 0%, var(--bg) 42%, #eee4da 100%);
-      color: var(--text);
-      min-height: 100vh;
-    }
-    .wrap { max-width: 920px; margin: 0 auto; padding: 22px 14px 46px; }
-    header { padding: 10px 2px 6px; }
-    h1 { margin: 0 0 8px; font-size: clamp(28px, 6vw, 42px); letter-spacing: -0.05em; }
-    h2 { margin: 0 0 12px; font-size: 20px; letter-spacing: -0.02em; }
-    p { color: var(--muted); line-height: 1.7; margin: 0; }
-    .grid { display: grid; grid-template-columns: 1.16fr .84fr; gap: 16px; align-items: start; margin-top: 16px; }
-    @media (max-width: 820px) { .grid { grid-template-columns: 1fr; } }
-    .card {
-      background: rgba(255, 250, 246, .92);
-      border: 1px solid rgba(227, 214, 202, .95);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 17px;
-      backdrop-filter: blur(10px);
-    }
-    .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
-    .date { font-size: 14px; color: var(--muted); line-height: 1.5; }
-    .pill { border-radius: 999px; background: var(--soft); color: #694b3c; padding: 8px 12px; font-size: 13px; white-space: nowrap; }
-    .task { display: grid; grid-template-columns: 30px 1fr auto; gap: 10px; border-top: 1px solid var(--line); padding: 13px 0; align-items: start; }
-    .task:first-child { border-top: 0; }
-    input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--main); margin-top: 2px; }
-    .task-title { font-weight: 800; margin-bottom: 4px; }
-    .desc { color: var(--muted); font-size: 14px; line-height: 1.58; }
-    .time { font-size: 12px; background: var(--soft); border-radius: 999px; padding: 6px 8px; color: #654a3c; white-space: nowrap; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-    @media (max-width: 520px) { .form-grid { grid-template-columns: 1fr; } }
-    label { display: block; color: var(--muted); font-size: 13px; margin-bottom: 7px; }
-    select, textarea, button, input[type="date"] {
-      width: 100%; font: inherit; border: 1px solid var(--line); border-radius: 14px;
-      padding: 11px 12px; background: #fffdf9; color: var(--text); outline: none;
-    }
-    textarea { min-height: 84px; resize: vertical; line-height: 1.55; }
-    button { border: 0; cursor: pointer; background: var(--main); color: white; font-weight: 800; transition: transform .12s ease, opacity .12s ease; }
-    button:active { transform: scale(.985); }
-    button.secondary { background: var(--soft); color: #654a3c; border: 1px solid var(--line); }
-    button.danger { background: var(--red-bg); color: #8c3d2d; border: 1px solid var(--red-line); }
-    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-    @media (max-width: 520px) { .actions { grid-template-columns: 1fr; } }
-    .warn { margin-top: 12px; background: var(--red-bg); border: 1px solid var(--red-line); color: #7f3d2f; border-radius: 17px; padding: 12px; line-height: 1.65; font-size: 14px; }
-    .big { font-size: 42px; font-weight: 900; letter-spacing: -0.06em; margin: 2px 0 8px; }
-    .bar { height: 15px; background: #eaded4; border-radius: 999px; overflow: hidden; border: 1px solid #decfc3; }
-    .bar span { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, #d8b79d, var(--main)); border-radius: 999px; transition: width .25s ease; }
-    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0 16px; }
-    .stat { background: #fffdf9; border: 1px solid var(--line); border-radius: 16px; padding: 10px; }
-    .stat b { display: block; font-size: 23px; margin-bottom: 2px; }
-    .stat span { color: var(--muted); font-size: 12px; }
-    .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 7px; }
-    .day { min-height: 54px; border-radius: 14px; border: 1px solid var(--line); background: #fffdf9; padding: 7px; font-size: 12px; color: var(--muted); display: flex; flex-direction: column; justify-content: space-between; }
-    .day.done { background: var(--green-bg); border-color: var(--green-line); color: #416849; }
-    .day.partial { background: var(--yellow-bg); border-color: var(--yellow-line); color: #7a5720; }
-    .day.today { box-shadow: 0 0 0 2px rgba(155, 106, 77, .25) inset; }
-    .mark { font-size: 18px; line-height: 1; font-weight: 900; }
-    .tiny { color: var(--muted); font-size: 12px; line-height: 1.6; margin-top: 8px; }
-    .toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: rgba(43, 37, 33, .92); color: white; padding: 10px 14px; border-radius: 999px; font-size: 14px; opacity: 0; pointer-events: none; transition: .2s ease; }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
+    }* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: radial-gradient(circle at top, #eef2ff 0, #f6f7fb 42%, #f8fafc 100%);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.app {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 22px 16px 56px;
+}
+
+.hero {
+  background: linear-gradient(135deg, #ffffff 0%, #eef2ff 100%);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  box-shadow: var(--shadow);
+  border-radius: 28px;
+  padding: 24px;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  width: 210px;
+  height: 210px;
+  border-radius: 50%;
+  background: rgba(100, 116, 139, 0.09);
+  right: -70px;
+  top: -70px;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: clamp(26px, 5vw, 40px);
+  letter-spacing: -0.04em;
+  position: relative;
+  z-index: 1;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.65;
+  max-width: 680px;
+  position: relative;
+  z-index: 1;
+}
+
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.pill {
+  background: rgba(255,255,255,.75);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  color: #475569;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 16px;
+}
+
+@media (max-width: 820px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+h2 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+
+h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 520px) {
+  .status-grid { grid-template-columns: 1fr; }
+}
+
+.status-btn {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 18px;
+  padding: 14px;
+  cursor: pointer;
+  transition: transform .15s ease, border-color .15s ease, background .15s ease;
+  color: var(--text);
+}
+
+.status-btn:hover { transform: translateY(-1px); }
+.status-btn.active {
+  border-color: #94a3b8;
+  background: #f8fafc;
+  box-shadow: inset 0 0 0 1px #cbd5e1;
+}
+
+.status-btn strong { display: block; margin-bottom: 4px; }
+.status-btn span { display: block; color: var(--muted); font-size: 13px; line-height: 1.4; }
+
+.range-wrap {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0;
+}
+
+input[type="range"] { width: 100%; accent-color: var(--primary); }
+
+.score {
+  min-width: 44px;
+  height: 36px;
+  border-radius: 12px;
+  background: #f1f5f9;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+}
+
+textarea {
+  width: 100%;
+  min-height: 88px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+}
+
+textarea:focus, input:focus { border-color: #94a3b8; }
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+button.primary, button.secondary, button.danger, button.ghost {
+  border: 0;
+  border-radius: 16px;
+  padding: 12px 15px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform .12s ease, opacity .12s ease;
+}
+
+button:active { transform: scale(.98); }
+button.primary { background: var(--primary); color: #fff; }
+button.primary:hover { background: var(--primary-dark); }
+button.secondary { background: #eef2ff; color: #3730a3; }
+button.danger { background: #fee2e2; color: #991b1b; }
+button.ghost { background: #f8fafc; color: #475569; border: 1px solid var(--line); }
+
+.plan-card {
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 18px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+.plan-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #f1f5f9;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.tag.green { background: #dcfce7; color: #166534; }
+.tag.yellow { background: #fef3c7; color: #92400e; }
+.tag.red { background: #fee2e2; color: #991b1b; }
+
+.exercise-list {
+  display: grid;
+  gap: 10px;
+}
+
+.exercise {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px;
+  background: #fff;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.exercise.done {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.num {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: #f1f5f9;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  color: #475569;
+}
+
+.exercise.done .num { background: #dcfce7; color: #166534; }
+
+.exercise p { margin: 4px 0 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
+
+.mini-btn {
+  border: 1px solid var(--line);
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 9px 10px;
+  cursor: pointer;
+  font-weight: 700;
+  color: #475569;
+}
+
+.timer-box {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 18px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #f8fafc, #eef2ff);
+  border: 1px solid #e2e8f0;
+}
+
+.timer-num {
+  font-size: clamp(54px, 14vw, 88px);
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.08em;
+  margin: 8px 0 12px;
+  color: #334155;
+}
+
+.current-exercise {
+  font-weight: 800;
+  font-size: 17px;
+}
+
+.visual-box {
+  height: 150px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+  background-size: 18px 18px;
+  position: relative;
+  overflow: hidden;
+  margin-top: 12px;
+}
+
+.dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #475569;
+  position: absolute;
+  top: 64px;
+  left: 16px;
+  animation: moveDot 4s ease-in-out infinite alternate;
+}
+
+@keyframes moveDot {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(min(760px, 100vw) - 120px)); }
+}
+
+.breath-circle {
+  width: 116px;
+  height: 116px;
+  border-radius: 50%;
+  background: rgba(100, 116, 139, .12);
+  border: 1px solid rgba(100, 116, 139, .2);
+  display: grid;
+  place-items: center;
+  margin: 12px auto;
+  animation: breathe 8s ease-in-out infinite;
+  color: #475569;
+  font-weight: 800;
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(.86); }
+  38% { transform: scale(1.08); }
+}
+
+.alert {
+  border-radius: 18px;
+  padding: 14px;
+  line-height: 1.6;
+  font-size: 14px;
+  margin-top: 12px;
+}
+
+.alert.safe { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+.alert.warn { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+.alert.stop { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+
+.checks {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+label.check {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  color: #374151;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--primary); margin-top: 2px; }
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.stat {
+  background: #f8fafc;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px;
+}
+
+.stat strong { display: block; font-size: 24px; }
+.stat span { color: var(--muted); font-size: 12px; }
+
+.bars {
+  display: flex;
+  align-items: end;
+  gap: 7px;
+  height: 118px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px;
+  background: #f8fafc;
+  overflow-x: auto;
+}
+
+.bar-wrap {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  min-width: 24px;
+}
+
+.bar {
+  width: 14px;
+  border-radius: 999px 999px 4px 4px;
+  background: #cbd5e1;
+  min-height: 4px;
+}
+
+.bar.done { background: #86efac; }
+.bar-label { font-size: 10px; color: var(--muted); }
+
+.small-list {
+  padding-left: 18px;
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.footer-note {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+  text-align: center;
+  margin-top: 18px;
+}
+
+.hidden { display: none !important; }
+
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <h1>弱视斜视训练打卡</h1>
-      <p>每天 8—10 分钟。短、轻、稳地练。明显头晕、恶心、眼痛、重影持续不消失，就停止。</p>
-    </header><div class="grid">
-  <main class="card">
-    <div class="top">
-      <div>
-        <h2>今天训练</h2>
-        <div class="date" id="dateText"></div>
+  <main class="app">
+    <section class="hero">
+      <h1>PPPD 前庭训练打卡</h1>
+      <p class="subtitle">每天 5–8 分钟，轻量、稳定、不过度刺激。目标不是“把头晕打败”，而是让大脑重新确认：轻微晕感可以被身体安全地处理。</p>
+      <div class="pill-row">
+        <span class="pill" id="todayText">今天</span>
+        <span class="pill">适合轻量坚持</span>
+        <span class="pill">本地保存打卡记录</span>
+        <span class="pill">可长期部署到 GitHub Pages</span>
       </div>
-      <div class="pill" id="statusPill">未打卡</div>
-    </div>
-
-    <div id="taskBox"></div>
-
-    <div class="form-grid">
-      <div>
-        <label for="fatigue">眼睛疲劳程度</label>
-        <select id="fatigue">
-          <option value="">请选择</option>
-          <option value="1">1 - 很轻松</option>
-          <option value="2">2 - 轻微疲劳</option>
-          <option value="3">3 - 一般疲劳</option>
-          <option value="4">4 - 比较累</option>
-          <option value="5">5 - 很累，明天减量</option>
-        </select>
+    </section><div class="grid">
+  <section>
+    <div class="card">
+      <div class="section-title">
+        <h2>今天身体状态</h2>
+        <span class="tag" id="recommendTag">未选择</span>
       </div>
-      <div>
-        <label for="dizzy">是否头晕/不适</label>
-        <select id="dizzy">
-          <option value="">请选择</option>
-          <option value="否">否</option>
-          <option value="轻微">轻微</option>
-          <option value="明显，已停止">明显，已停止</option>
-        </select>
+      <div class="status-grid" id="statusGrid">
+        <button class="status-btn" data-status="normal">
+          <strong>还可以</strong>
+          <span>有一点点晕，但不影响坐站。</span>
+        </button>
+        <button class="status-btn" data-status="dizzy">
+          <strong>有点晕 / 有点怕</strong>
+          <span>适合做降刺激版，不追求强度。</span>
+        </button>
+        <button class="status-btn" data-status="hot">
+          <strong>天气热 / 闷闷的</strong>
+          <span>先降温、喝水，再做很轻的训练。</span>
+        </button>
+        <button class="status-btn" data-status="bad">
+          <strong>今天明显不舒服</strong>
+          <span>只做安全版或暂停，别硬扛。</span>
+        </button>
+      </div>
+
+      <div class="alert warn" id="modeHint">先选一个状态，我会自动给你切换今天的训练强度。</div>
+
+      <div style="margin-top: 16px;">
+        <h3>训练前晕感/害怕感：<span id="beforeLabel">3</span>/10</h3>
+        <div class="range-wrap">
+          <input id="beforeRange" type="range" min="0" max="10" value="3" />
+          <div class="score" id="beforeScore">3</div>
+        </div>
+      </div>
+
+      <div class="checks">
+        <label class="check"><input id="checkWater" type="checkbox"> 我已经喝了几口水，不空腹硬练</label>
+        <label class="check"><input id="checkAir" type="checkbox"> 我已经通风/降温，坐在安全位置</label>
+        <label class="check"><input id="checkRed" type="checkbox"> 我没有胸痛、晕倒、单侧无力麻木、说话不清、严重头痛、持续呕吐等红旗情况</label>
       </div>
     </div>
 
-    <div style="margin-top: 10px;">
-      <label for="note">备注</label>
-      <textarea id="note" placeholder="比如：遮眼1分钟有点晕；今天练完还行。"></textarea>
+    <div class="card">
+      <div class="section-title">
+        <h2>今日训练</h2>
+        <span class="tag green" id="durationTag">约 6 分钟</span>
+      </div>
+      <div class="plan-card">
+        <div class="plan-head">
+          <h3 id="planTitle">温和标准版</h3>
+          <span class="tag" id="planIntensity">轻中度</span>
+        </div>
+        <p class="muted" id="planDesc">慢一点、稳一点。训练中晕感可以有一点，但不要追求刺激感。</p>
+      </div>
+
+      <div class="timer-box">
+        <div class="current-exercise" id="currentExercise">准备开始</div>
+        <div class="timer-num" id="timerNum">30</div>
+        <div class="button-row" style="justify-content:center;">
+          <button class="primary" id="startBtn">开始 / 暂停</button>
+          <button class="ghost" id="resetBtn">重置</button>
+          <button class="secondary" id="nextBtn">下一项</button>
+        </div>
+      </div>
+
+      <div class="visual-box" id="visualBox">
+        <div class="dot"></div>
+      </div>
+      <p class="muted" style="margin-top:8px;">视觉追踪区：只在状态还可以时使用。眼睛轻轻跟着点移动，不要盯到难受。</p>
+
+      <div class="exercise-list" id="exerciseList" style="margin-top: 14px;"></div>
     </div>
 
-    <div class="actions">
-      <button id="saveBtn">保存今天打卡</button>
-      <button class="secondary" id="lazyBtn">懒人版完成</button>
+    <div class="card">
+      <div class="section-title">
+        <h2>训练后记录</h2>
+        <span class="tag">本地保存</span>
+      </div>
+      <h3>训练后晕感/害怕感：<span id="afterLabel">3</span>/10</h3>
+      <div class="range-wrap">
+        <input id="afterRange" type="range" min="0" max="10" value="3" />
+        <div class="score" id="afterScore">3</div>
+      </div>
+      <textarea id="note" placeholder="今天可以简单记一句：比如天气热、坐着闷、练完降到几分、有没有害怕感。"></textarea>
+      <div class="button-row">
+        <button class="primary" id="saveBtn">保存今日打卡</button>
+        <button class="danger" id="clearTodayBtn">清空今日记录</button>
+      </div>
+      <div class="alert safe hidden" id="saveHint">已保存。今天已经不是“被症状牵着走”，你做了一点点主动恢复。</div>
     </div>
-    <div class="actions">
-      <button class="secondary" id="exportBtn">导出记录 CSV</button>
-      <button class="danger" id="clearBtn">清空记录</button>
+  </section>
+
+  <aside>
+    <div class="card">
+      <div class="section-title">
+        <h2>恢复提醒</h2>
+        <span class="tag yellow">别猛练</span>
+      </div>
+      <ul class="small-list">
+        <li>PPPD 更适合“每天少量重复”，不是一次练很久。</li>
+        <li>训练中轻微晕感可以接受；明显加重、恶心、恐惧升高就停。</li>
+        <li>天气热、闷、睡眠差、经期、压力大时，自动降级训练。</li>
+        <li>不要反复测试自己晕不晕，测试本身会增加警觉。</li>
+      </ul>
+      <div class="alert stop">
+        如果出现胸痛、晕倒、单侧无力/麻木、说话不清、持续呕吐、突发严重头痛、走路明显歪斜，请停止训练并及时就医。
+      </div>
     </div>
 
-    <div class="warn">
-      <strong>提醒：</strong>练完应该是“眼睛活动开了”，不是“被掏空”。如果当天不舒服，只做远近切换也算维护。
-    </div>
-  </main>
-
-  <aside class="card">
-    <h2>最近 28 天完成率</h2>
-    <div class="big" id="percentText">0%</div>
-    <div class="bar"><span id="barFill"></span></div>
-
-    <div class="stats">
-      <div class="stat"><b id="doneCount">0</b><span>完整完成</span></div>
-      <div class="stat"><b id="partialCount">0</b><span>部分完成</span></div>
-      <div class="stat"><b id="streakCount">0</b><span>连续天数</span></div>
+    <div class="card">
+      <div class="section-title">
+        <h2>我的数据</h2>
+        <button class="mini-btn" id="exportBtn">导出</button>
+      </div>
+      <div class="stats">
+        <div class="stat"><strong id="streakNum">0</strong><span>连续打卡</span></div>
+        <div class="stat"><strong id="totalNum">0</strong><span>总打卡</span></div>
+        <div class="stat"><strong id="avgNum">-</strong><span>近7天均分</span></div>
+      </div>
+      <h3 style="margin-top:16px;">近 14 天</h3>
+      <div class="bars" id="bars"></div>
     </div>
 
-    <h2>最近 28 天</h2>
-    <div class="days" id="daysBox"></div>
-    <p class="tiny">绿色=完整完成，黄色=懒人版/部分完成。别追求完美，能继续就很好。</p>
-
-    <div class="warn" style="background:#fff8ee;border-color:#ead1a9;color:#775622;">
-      <strong>懒人版：</strong>远近切换 2 分钟 + 笔尖靠近 2 分钟 + 弱视眼看字 3 分钟。总共 7 分钟，也算完成。
+    <div class="card">
+      <div class="section-title">
+        <h2>今天怎么练？</h2>
+      </div>
+      <div class="alert safe">
+        <strong>绿色原则：</strong>练完 10–20 分钟能慢慢回落，就是合适强度。
+      </div>
+      <div class="alert warn">
+        <strong>黄色原则：</strong>闷热、害怕感强、睡眠差时，只做坐姿和呼吸，不做站立挑战。
+      </div>
+      <div class="alert stop">
+        <strong>红色原则：</strong>越练越慌、越练越晕，今天就停。停止不是失败，是保护系统不过载。
+      </div>
     </div>
   </aside>
 </div>
 
-  </div>
-  <div class="toast" id="toast">已保存</div>  <script>
-    const tasks = [
-      ["nearFar", "远近切换", "2分钟", "看近处笔尖/手指 3 秒，再看远处墙面或窗外目标 3 秒，来回切换。"],
-      ["pencil", "笔尖靠近训练", "2分钟", "笔放眼前约 40cm，盯住笔尖慢慢靠近鼻尖；重影或不适就退回。"],
-      ["weakEye", "弱视眼精细使用", "3分钟", "轻遮好眼，用弱视眼看小字、微信读书、找不同或数图案。头晕就改成 1 分钟 × 3 组。"],
-      ["tracking", "双眼追踪放松", "1-2分钟", "手指在眼前慢慢画横 8 字，眼睛跟着走，头不要动。"],
-      ["rest", "闭眼休息", "1分钟", "闭眼放松，深呼吸几次。练完不要立刻猛刷手机。"]
-    ];
+<p class="footer-note">这是自我管理和训练打卡工具，不能替代医生诊断或治疗。用药、停药、加减量请听医生安排。</p>
 
-    const storageKey = "eye_training_checkins_v3";
+  </main>  <script>
+    const todayKey = new Date().toISOString().slice(0, 10);
+    const cnDate = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+    document.getElementById('todayText').textContent = cnDate;
+
+    const plans = {
+      normal: {
+        tag: ['标准版', 'green'], title: '温和标准版', intensity: '轻中度', duration: '约 7 分钟',
+        desc: '适合今天状态还可以的时候。保持轻微挑战，但不要追求晕感。',
+        exercises: [
+          ['长呼气降警报', 60, '吸气 3 秒，呼气 5–6 秒。让身体先知道现在安全。'],
+          ['坐姿 VOR x1 头左右转', 30, '眼睛看定墙上一个点，头小幅左右转。慢，不要甩头。'],
+          ['休息观察', 30, '不测试晕不晕，只感受脚踩地和椅子支撑。'],
+          ['近远切换', 40, '看近处手指 2 秒，再看远处墙面 2 秒。慢慢切换。'],
+          ['视觉追踪', 40, '眼睛轻轻跟随下方圆点移动。不舒服就闭眼休息。'],
+          ['靠墙站立平衡', 30, '站在墙边或床边，双脚与肩同宽，视线平视。'],
+          ['结束安抚', 60, '对自己说：我可以有一点晕，但我是安全的，它会过去。']
+        ]
+      },
+      dizzy: {
+        tag: ['降刺激版', 'yellow'], title: '有点晕时的降刺激版', intensity: '轻度', duration: '约 5 分钟',
+        desc: '今天目标不是突破，是让大脑重新获得安全感。全程坐姿即可。',
+        exercises: [
+          ['长呼气降警报', 60, '吸气 3 秒，呼气 5–6 秒。先降害怕感。'],
+          ['坐姿小幅头转', 20, '眼睛看定一个点，头只转一点点，慢慢来。'],
+          ['休息观察', 40, '手摸桌面或腿，确认身体有支撑。'],
+          ['近远切换', 30, '看近处手指，再看远处墙面。慢，别急。'],
+          ['肩颈放松', 40, '耸肩、放下，轻轻转肩。不要转脖子太猛。'],
+          ['结束安抚', 60, '今天做轻一点也是训练。我的系统正在重新稳定。']
+        ]
+      },
+      hot: {
+        tag: ['闷热安全版', 'yellow'], title: '天气热/闷时安全版', intensity: '很轻', duration: '约 4 分钟',
+        desc: '先处理环境：通风、降温、补水。训练只做一点点，不硬扛。',
+        exercises: [
+          ['降温补水', 60, '开窗/风扇/空调，小口喝水。先不急着训练。'],
+          ['长呼气', 60, '吸气 3 秒，呼气 6 秒。重点是慢慢呼出去。'],
+          ['坐姿小幅头转', 20, '眼睛看定一个点，头小幅左右转。'],
+          ['身体定位', 40, '说出 5 个看见的东西，4 个摸得到的东西。'],
+          ['结束安抚', 60, '闷热会放大晕感，我先把环境和警报降下来。']
+        ]
+      },
+      bad: {
+        tag: ['暂停/安抚版', 'red'], title: '明显不舒服时暂停版', intensity: '保护', duration: '约 3 分钟',
+        desc: '今天不做前庭刺激，只做稳定。暂停不是失败，是防止系统过载。',
+        exercises: [
+          ['安全检查', 45, '确认没有红旗症状。有红旗就不要练，及时就医。'],
+          ['长呼气', 60, '吸气 3 秒，呼气 6 秒，重复。'],
+          ['身体接地', 45, '脚踩地，手摸椅子，说：我现在是安全的。'],
+          ['结束', 30, '今天到这里就可以。恢复靠稳定，不靠硬撑。']
+        ]
+      }
+    };
+
+    let selectedStatus = 'dizzy';
+    let exercises = [];
+    let currentIndex = 0;
+    let remaining = 30;
+    let timer = null;
+    let running = false;
+    let done = new Set();
+
     const $ = (id) => document.getElementById(id);
-    const pad = (n) => String(n).padStart(2, "0");
-    const dateKey = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-    const todayKey = () => dateKey(new Date());
 
-    function loadAll() {
-      try { return JSON.parse(localStorage.getItem(storageKey) || "{}"); }
+    function loadLogs() {
+      try { return JSON.parse(localStorage.getItem('pppdLogs') || '{}'); }
       catch { return {}; }
     }
-    function saveAll(data) { localStorage.setItem(storageKey, JSON.stringify(data)); }
-    function toast(text) {
-      const el = $("toast");
-      el.textContent = text;
-      el.classList.add("show");
-      setTimeout(() => el.classList.remove("show"), 1500);
+
+    function saveLogs(logs) {
+      localStorage.setItem('pppdLogs', JSON.stringify(logs));
     }
-    function renderDate() {
-      const d = new Date();
-      const w = ["日", "一", "二", "三", "四", "五", "六"][d.getDay()];
-      $("dateText").textContent = `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 星期${w}`;
+
+    function setStatus(status) {
+      selectedStatus = status;
+      document.querySelectorAll('.status-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.status === status));
+      const plan = plans[status];
+      $('recommendTag').textContent = plan.tag[0];
+      $('recommendTag').className = 'tag ' + plan.tag[1];
+      $('planTitle').textContent = plan.title;
+      $('planIntensity').textContent = plan.intensity;
+      $('durationTag').textContent = plan.duration;
+      $('planDesc').textContent = plan.desc;
+      $('modeHint').className = status === 'bad' ? 'alert stop' : status === 'normal' ? 'alert safe' : 'alert warn';
+      $('modeHint').textContent = status === 'normal'
+        ? '今天可以做温和标准版，但仍然保持轻量。'
+        : status === 'bad'
+          ? '今天不建议硬练。只做安抚版；如果有红旗症状，请及时就医。'
+          : '今天自动降级训练。你要的是稳定，不是证明自己没事。';
+      exercises = plan.exercises;
+      currentIndex = 0;
+      done = new Set();
+      resetTimer();
+      renderExercises();
+      $('visualBox').classList.toggle('hidden', status !== 'normal');
     }
-    function renderTasks(record = {}) {
-      $("taskBox").innerHTML = tasks.map(t => `
-        <div class="task">
-          <input type="checkbox" id="${t[0]}" ${record.items?.[t[0]] ? "checked" : ""} />
-          <div><div class="task-title">${t[1]}</div><div class="desc">${t[3]}</div></div>
-          <div class="time">${t[2]}</div>
-        </div>
-      `).join("");
+
+    function renderExercises() {
+      const box = $('exerciseList');
+      box.innerHTML = '';
+      exercises.forEach((ex, idx) => {
+        const div = document.createElement('div');
+        div.className = 'exercise' + (done.has(idx) ? ' done' : '');
+        div.innerHTML = `
+          <div class="num">${idx + 1}</div>
+          <div><strong>${ex[0]}</strong><p>${ex[2]}</p></div>
+          <button class="mini-btn" data-idx="${idx}">${done.has(idx) ? '已做' : '打卡'}</button>
+        `;
+        box.appendChild(div);
+      });
+      document.querySelectorAll('.mini-btn[data-idx]').forEach(btn => {
+        btn.onclick = () => {
+          const idx = Number(btn.dataset.idx);
+          done.has(idx) ? done.delete(idx) : done.add(idx);
+          renderExercises();
+        };
+      });
+      updateCurrentExercise();
     }
-    function hydrateToday() {
-      renderDate();
-      const rec = loadAll()[todayKey()] || {};
-      renderTasks(rec);
-      $("fatigue").value = rec.fatigue || "";
-      $("dizzy").value = rec.dizzy || "";
-      $("note").value = rec.note || "";
-      updatePill(rec.type);
-      renderSummary();
+
+    function updateCurrentExercise() {
+      if (!exercises.length) return;
+      const ex = exercises[currentIndex];
+      $('currentExercise').textContent = `${currentIndex + 1}/${exercises.length} ${ex[0]}`;
+      $('timerNum').textContent = remaining;
     }
-    function collect(typeOverride = null) {
-      const items = {};
-      tasks.forEach(t => items[t[0]] = $(t[0]).checked);
-      const count = Object.values(items).filter(Boolean).length;
-      let type = typeOverride || (count === tasks.length ? "done" : count > 0 ? "partial" : "none");
-      return {
-        date: todayKey(),
-        type,
-        items,
-        count,
-        fatigue: $("fatigue").value,
-        dizzy: $("dizzy").value,
-        note: $("note").value.trim(),
-        updatedAt: new Date().toISOString()
-      };
+
+    function resetTimer() {
+      clearInterval(timer);
+      running = false;
+      remaining = exercises[currentIndex] ? exercises[currentIndex][1] : 30;
+      updateCurrentExercise();
     }
-    function updatePill(type) {
-      const pill = $("statusPill");
-      if (type === "done") { pill.textContent = "今日已完整完成"; pill.style.background = "#e3f0e5"; pill.style.color = "#406b47"; }
-      else if (type === "partial") { pill.textContent = "今日已部分完成"; pill.style.background = "#fff1d9"; pill.style.color = "#7c5a23"; }
-      else { pill.textContent = "未打卡"; pill.style.background = "#f0e4d9"; pill.style.color = "#694b3c"; }
-    }
-    function saveToday(typeOverride = null) {
-      const all = loadAll();
-      const rec = collect(typeOverride);
-      all[rec.date] = rec;
-      saveAll(all);
-      updatePill(rec.type);
-      renderSummary();
-      toast("已保存今天打卡");
-    }
-    function markLazy() {
-      tasks.forEach(t => { $(t[0]).checked = ["nearFar", "pencil", "weakEye"].includes(t[0]); });
-      saveToday("partial");
-    }
-    function renderSummary() {
-      const all = loadAll();
-      const now = new Date();
-      const days = [];
-      for (let i = 27; i >= 0; i--) {
-        const d = new Date(now);
-        d.setDate(now.getDate() - i);
-        const k = dateKey(d);
-        days.push({ date: d, key: k, rec: all[k] });
+
+    function startPause() {
+      if (!exercises.length) return;
+      if (running) {
+        clearInterval(timer);
+        running = false;
+        return;
       }
-      const done = days.filter(x => x.rec?.type === "done").length;
-      const partial = days.filter(x => x.rec?.type === "partial").length;
-      const percent = Math.round(((done + partial * 0.6) / 28) * 100);
-      $("doneCount").textContent = done;
-      $("partialCount").textContent = partial;
-      $("percentText").textContent = percent + "%";
-      $("barFill").style.width = percent + "%";
+      running = true;
+      timer = setInterval(() => {
+        remaining -= 1;
+        if (remaining <= 0) {
+          done.add(currentIndex);
+          clearInterval(timer);
+          running = false;
+          if (currentIndex < exercises.length - 1) {
+            currentIndex += 1;
+            remaining = exercises[currentIndex][1];
+          } else {
+            remaining = 0;
+          }
+          renderExercises();
+        }
+        updateCurrentExercise();
+      }, 1000);
+    }
+
+    function nextExercise() {
+      done.add(currentIndex);
+      if (currentIndex < exercises.length - 1) currentIndex += 1;
+      resetTimer();
+      renderExercises();
+    }
+
+    function bindRanges() {
+      [['beforeRange','beforeScore','beforeLabel'], ['afterRange','afterScore','afterLabel']].forEach(([range, score, label]) => {
+        $(range).addEventListener('input', () => {
+          $(score).textContent = $(range).value;
+          $(label).textContent = $(range).value;
+        });
+      });
+    }
+
+    function loadToday() {
+      const logs = loadLogs();
+      const log = logs[todayKey];
+      if (!log) return;
+      $('beforeRange').value = log.before ?? 3;
+      $('afterRange').value = log.after ?? 3;
+      $('beforeScore').textContent = $('beforeLabel').textContent = $('beforeRange').value;
+      $('afterScore').textContent = $('afterLabel').textContent = $('afterRange').value;
+      $('note').value = log.note || '';
+      $('checkWater').checked = !!log.checkWater;
+      $('checkAir').checked = !!log.checkAir;
+      $('checkRed').checked = log.checkRed !== false;
+      setStatus(log.status || 'dizzy');
+      done = new Set(log.done || []);
+      renderExercises();
+    }
+
+    function saveToday() {
+      const logs = loadLogs();
+      logs[todayKey] = {
+        date: todayKey,
+        status: selectedStatus,
+        before: Number($('beforeRange').value),
+        after: Number($('afterRange').value),
+        note: $('note').value.trim(),
+        checkWater: $('checkWater').checked,
+        checkAir: $('checkAir').checked,
+        checkRed: $('checkRed').checked,
+        done: Array.from(done),
+        completed: done.size >= Math.max(1, exercises.length - 1),
+        savedAt: new Date().toISOString()
+      };
+      saveLogs(logs);
+      $('saveHint').classList.remove('hidden');
+      setTimeout(() => $('saveHint').classList.add('hidden'), 2800);
+      renderStats();
+    }
+
+    function clearToday() {
+      const logs = loadLogs();
+      delete logs[todayKey];
+      saveLogs(logs);
+      done = new Set();
+      $('note').value = '';
+      $('checkWater').checked = false;
+      $('checkAir').checked = false;
+      $('checkRed').checked = false;
+      renderExercises();
+      renderStats();
+    }
+
+    function dateAdd(date, days) {
+      const d = new Date(date);
+      d.setDate(d.getDate() + days);
+      return d.toISOString().slice(0,10);
+    }
+
+    function renderStats() {
+      const logs = loadLogs();
+      const keys = Object.keys(logs).sort();
+      $('totalNum').textContent = keys.length;
 
       let streak = 0;
-      for (let i = days.length - 1; i >= 0; i--) {
-        if (["done", "partial"].includes(days[i].rec?.type)) streak++;
+      for (let i = 0; i < 365; i++) {
+        const key = dateAdd(todayKey, -i);
+        if (logs[key]) streak += 1;
         else break;
       }
-      $("streakCount").textContent = streak;
+      $('streakNum').textContent = streak;
 
-      $("daysBox").innerHTML = days.map(x => {
-        const cls = x.rec?.type === "done" ? "done" : x.rec?.type === "partial" ? "partial" : "";
-        const mark = x.rec?.type === "done" ? "✓" : x.rec?.type === "partial" ? "•" : "";
-        const isToday = x.key === todayKey() ? "today" : "";
-        return `<div class="day ${cls} ${isToday}"><span>${x.date.getMonth()+1}/${x.date.getDate()}</span><span class="mark">${mark}</span></div>`;
-      }).join("");
-    }
-    function exportCSV() {
-      const all = loadAll();
-      const rows = [["日期", "状态", "完成项目数", "疲劳程度", "头晕/不适", "备注", "更新时间"]];
-      Object.keys(all).sort().forEach(k => {
-        const r = all[k];
-        const status = r.type === "done" ? "完整完成" : r.type === "partial" ? "部分完成" : "未完成";
-        rows.push([r.date, status, r.count || 0, r.fatigue || "", r.dizzy || "", r.note || "", r.updatedAt || ""]);
-      });
-      const csv = "\uFEFF" + rows.map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
-      a.download = "弱视斜视训练打卡记录.csv";
-      a.click();
-      URL.revokeObjectURL(a.href);
-    }
-    function clearAll() {
-      if (confirm("确定要清空所有打卡记录吗？")) {
-        localStorage.removeItem(storageKey);
-        hydrateToday();
-        toast("记录已清空");
+      const last7 = [];
+      for (let i = 6; i >= 0; i--) {
+        const key = dateAdd(todayKey, -i);
+        if (logs[key]) last7.push(Number(logs[key].after ?? logs[key].before ?? 0));
+      }
+      $('avgNum').textContent = last7.length ? (last7.reduce((a,b)=>a+b,0)/last7.length).toFixed(1) : '-';
+
+      const bars = $('bars');
+      bars.innerHTML = '';
+      for (let i = 13; i >= 0; i--) {
+        const key = dateAdd(todayKey, -i);
+        const log = logs[key];
+        const val = log ? Number(log.after ?? log.before ?? 1) : 0;
+        const wrap = document.createElement('div');
+        wrap.className = 'bar-wrap';
+        wrap.title = log ? `${key}：训练后 ${val}/10` : `${key}：未打卡`;
+        wrap.innerHTML = `<div class="bar ${log ? 'done' : ''}" style="height:${log ? Math.max(8, 10 + val * 8) : 4}px"></div><div class="bar-label">${key.slice(5).replace('-', '/')}</div>`;
+        bars.appendChild(wrap);
       }
     }
 
-    $("saveBtn").addEventListener("click", () => saveToday());
-    $("lazyBtn").addEventListener("click", markLazy);
-    $("exportBtn").addEventListener("click", exportCSV);
-    $("clearBtn").addEventListener("click", clearAll);
-    hydrateToday();
+    function exportData() {
+      const logs = loadLogs();
+      const text = JSON.stringify(logs, null, 2);
+      const blob = new Blob([text], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `pppd-training-logs-${todayKey}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    document.querySelectorAll('.status-btn').forEach(btn => btn.addEventListener('click', () => setStatus(btn.dataset.status)));
+    $('startBtn').onclick = startPause;
+    $('resetBtn').onclick = resetTimer;
+    $('nextBtn').onclick = nextExercise;
+    $('saveBtn').onclick = saveToday;
+    $('clearTodayBtn').onclick = clearToday;
+    $('exportBtn').onclick = exportData;
+
+    bindRanges();
+    setStatus('dizzy');
+    loadToday();
+    renderStats();
   </script></body>
 </html>
