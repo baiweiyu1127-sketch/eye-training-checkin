@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>低负担肌肉训练</title>
+<meta name="theme-color" content="#f6efe7" />
+<style>
+:root{--bg:#f7f2ec;--card:#fffaf6;--text:#2b2521;--muted:#7b6c62;--line:#e3d6ca;--main:#9b6a4d;--soft:#f0e4d9;--ok:#e8f3ea;--warn:#fff4dd;--red:#fff1ea}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#fff8ef,var(--bg));font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;color:var(--text)}
+.wrap{max-width:760px;margin:0 auto;padding:20px 14px 46px}h1{font-size:30px;margin:8px 0 6px;letter-spacing:-.04em}p{color:var(--muted);line-height:1.65;margin:0}
+.card{background:rgba(255,250,246,.94);border:1px solid var(--line);border-radius:22px;padding:16px;margin:14px 0;box-shadow:0 12px 30px rgba(81,56,40,.1)}
+.row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}.pill{background:var(--soft);color:#694b3c;border-radius:999px;padding:7px 12px;font-size:13px}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.tab{border:1px solid var(--line);background:#fffdf9;color:var(--text);border-radius:16px;padding:10px;font-weight:700}.tab.active{background:var(--main);color:white}
+.move{display:grid;grid-template-columns:30px 1fr auto;gap:10px;border-top:1px solid var(--line);padding:13px 0;align-items:start}.move:first-child{border-top:0}
+input[type=checkbox]{width:22px;height:22px;accent-color:var(--main);margin-top:2px}.name{font-weight:800;margin-bottom:4px}.desc{font-size:14px;color:var(--muted);line-height:1.55}.tag{font-size:12px;background:var(--soft);border-radius:999px;padding:6px 8px;white-space:nowrap;color:#654a3c}
+button{width:100%;border:0;border-radius:14px;padding:12px;font:inherit;font-weight:800;background:var(--main);color:white}.secondary{background:var(--soft);color:#654a3c;border:1px solid var(--line)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{background:#fffdf9;border:1px solid var(--line);border-radius:16px;padding:12px}.stat b{font-size:24px}.warn{background:var(--red);border:1px solid #e8c5b7;color:#7f3d2f;border-radius:16px;padding:12px;font-size:14px;line-height:1.6}
+.bar{height:14px;background:#eaded4;border-radius:999px;overflow:hidden}.bar span{display:block;height:100%;width:0;background:var(--main)}
+.small{font-size:13px;color:var(--muted);line-height:1.6}.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:rgba(43,37,33,.92);color:white;padding:10px 14px;border-radius:999px;font-size:14px;opacity:0;transition:.2s}.toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>低负担肌肉训练</h1>
+  <p>适合瑜伽垫练：低冲击、不跳、不憋气。目标是让肚子视觉更收、背更挺、臀腿更有支撑。</p>
+
+  <div class="card">
+    <div class="row">
+      <div>
+        <h2 style="margin:0 0 6px">今天练哪组</h2>
+        <p id="todayText"></p>
+      </div>
+      <span class="pill" id="status">未完成</span>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchPlan('A')">A 臀核心</button>
+      <button class="tab" onclick="switchPlan('B')">B 背手臂</button>
+      <button class="tab" onclick="switchPlan('C')">C 轻塑形</button>
+    </div>
+    <div id="moves"></div>
+    <div class="grid" style="margin-top:10px">
+      <button onclick="save()">保存完成</button>
+      <button class="secondary" onclick="lazy()">只做1轮</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>最近 28 天</h2>
+    <div class="grid">
+      <div class="stat"><b id="done">0</b><br><span class="small">完整完成</span></div>
+      <div class="stat"><b id="partial">0</b><br><span class="small">部分完成</span></div>
+    </div>
+    <p class="small" style="margin-top:10px">完成率</p>
+    <div class="bar"><span id="bar"></span></div>
+    <p class="small" style="margin-top:10px">不需要每天练力量。每周 3 次就够，其他日子散步和拉伸。</p>
+  </div>
+
+  <div class="card">
+    <h2>安全规则</h2>
+    <div class="warn">
+      心慌、头晕、胸闷、背痛加重、经期量多、痔疮不适时，直接降级或休息。所有动作都不要憋气，不做仰卧起坐、波比跳、开合跳和长时间平板。
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast">已保存</div>
+
+<script>
+const plans={
+ A:[
+  ["臀桥","12次 × 2组","躺姿屈膝，呼气抬臀，顶端停1秒。不要塌腰，不憋气。"],
+  ["死虫式","每侧8次 × 2组","腰背贴地，手脚交替慢放下。比卷腹更适合你。"],
+  ["鸟狗式","每侧8次 × 2组","四点跪姿，对侧手脚伸直，背保持稳定。"],
+  ["侧卧抬腿","每侧12次 × 2组","慢抬慢放，不要甩腿，练臀侧线条。"],
+  ["猫牛式/婴儿式","2分钟","收尾放松背部，动作越慢越好。"]
+ ],
+ B:[
+  ["靠墙俯卧撑","10次 × 2组","身体一条线，胸靠近墙再推回，肩膀别耸。"],
+  ["臀桥","12次 × 2组","练臀腿后侧，让身体更有支撑。"],
+  ["鸟狗式","每侧8次 × 2组","练背部和核心稳定，动作慢。"],
+  ["靠墙静蹲","20秒 × 2组","微蹲即可，不要深蹲；膝盖不舒服就取消。"],
+  ["胸背打开","30秒 × 2组","靠墙或双手背后轻扣，别硬拉肩膀。"]
+ ],
+ C:[
+  ["坐站训练","10次 × 2组","从椅子坐下站起，速度慢，别憋气。"],
+  ["跪姿平板","10-15秒 × 2组","膝盖着地，腹压大或痔疮不适就换死虫式。"],
+  ["侧卧蚌式开合","每侧12次 × 2组","侧卧屈膝，膝盖慢慢打开合上，骨盆别晃。"],
+  ["死虫式","每侧8次 × 1组","核心稳定，轻轻做就好。"],
+  ["靠墙站","1分钟","后脑勺、背、臀尽量靠墙，放松肩颈。"]
+ ]
+};
+let current="A";
+const key="strength_training_simple_v1";
+const pad=n=>String(n).padStart(2,"0");
+const dkey=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+function todayPlan(){
+ const day=new Date().getDay();
+ if(day===1) return "A";
+ if(day===4) return "B";
+ if(day===6) return "C";
+ return "A";
+}
+function render(){
+ document.getElementById("todayText").textContent="建议：周一A、周四B、周六C；不舒服时只做1轮。";
+ document.querySelectorAll(".tab").forEach((b,i)=>b.classList.toggle("active",["A","B","C"][i]===current));
+ const rec=(JSON.parse(localStorage.getItem(key)||"{}"))[dkey(new Date())]||{};
+ document.getElementById("moves").innerHTML=plans[current].map((m,i)=>`
+  <div class="move">
+   <input type="checkbox" id="m${i}" ${rec.items?.[current]?.[i]?"checked":""}>
+   <div><div class="name">${m[0]}</div><div class="desc">${m[2]}</div></div>
+   <div class="tag">${m[1]}</div>
+  </div>`).join("");
+ document.getElementById("status").textContent=rec.type==="done"?"今日已完整完成":rec.type==="partial"?"今日已部分完成":"未完成";
+ summary();
+}
+function switchPlan(p){current=p;render()}
+function save(type){
+ const all=JSON.parse(localStorage.getItem(key)||"{}"), k=dkey(new Date());
+ const items=all[k]?.items||{}; items[current]=plans[current].map((_,i)=>document.getElementById("m"+i).checked);
+ const count=items[current].filter(Boolean).length;
+ all[k]={date:k,plan:current,type:type||(count===plans[current].length?"done":count>0?"partial":"none"),items,updatedAt:new Date().toISOString()};
+ localStorage.setItem(key,JSON.stringify(all)); toast("已保存"); render();
+}
+function lazy(){plans[current].forEach((_,i)=>document.getElementById("m"+i).checked=i<3);save("partial")}
+function summary(){
+ const all=JSON.parse(localStorage.getItem(key)||"{}");let done=0,partial=0;
+ for(let i=0;i<28;i++){const d=new Date();d.setDate(d.getDate()-i);const r=all[dkey(d)];if(r?.type==="done")done++;if(r?.type==="partial")partial++}
+ document.getElementById("done").textContent=done;document.getElementById("partial").textContent=partial;
+ document.getElementById("bar").style.width=Math.round((done+partial*.6)/28*100)+"%";
+}
+function toast(t){const e=document.getElementByI
