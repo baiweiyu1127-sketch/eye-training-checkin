@@ -80,4 +80,312 @@
     display:grid;place-items:center;
     font-weight:800;color:#526151;
   }
-  .mini{background:#f1f5f9;color:#475569;padding:
+  .mini{background:#f1f5f9;color:#475569;padding:9px 10px;font-size:13px}
+  input[type=range]{width:100%;accent-color:#6b7d6a}
+  textarea{
+    width:100%;
+    min-height:82px;
+    border-radius:16px;
+    border:1px solid #e5e7eb;
+    padding:12px;
+    font-family:inherit;
+    font-size:14px;
+  }
+  .alert{
+    padding:13px;
+    border-radius:16px;
+    line-height:1.6;
+    font-size:14px;
+    margin:10px 0;
+  }
+  .ok{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
+  .warn{background:#fff7ed;color:#9a3412;border:1px solid #fed7aa}
+  .stop{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .statbox{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .stat{
+    background:#f8fafc;
+    border-radius:16px;
+    padding:12px;
+    border:1px solid #e5e7eb;
+  }
+  .stat b{font-size:24px;display:block}
+</style>
+</head>
+
+<body>
+<div class="app">
+  <section class="hero">
+    <h1>背部舒缓练习</h1>
+    <p>每天 6–10 分钟，轻柔延展、核心稳定、坐姿提醒。重点不是把身体硬掰正，而是让背部少代偿、少紧绷、少疼。</p>
+  </section>
+
+  <section class="card">
+    <h2>今天背部状态</h2>
+    <div class="grid">
+      <button class="mode" onclick="setMode('easy')"><b>轻微酸胀</b><br><span class="small">做完整轻量版</span></button>
+      <button class="mode" onclick="setMode('left')"><b>左侧更疼</b><br><span class="small">减少扭转，温和稳定</span></button>
+      <button class="mode" onclick="setMode('sit')"><b>久坐后紧</b><br><span class="small">坐姿版，先松下来</span></button>
+      <button class="mode" onclick="setMode('bad')"><b>明显疼</b><br><span class="small">保护模式，不硬练</span></button>
+    </div>
+    <div id="hint" class="alert warn">先选一个状态，会自动切换练习。</div>
+
+    <h3>练习前疼痛/紧绷感：<span id="beforeText">4</span>/10</h3>
+    <input id="before" type="range" min="0" max="10" value="4" oninput="beforeText.innerText=this.value">
+  </section>
+
+  <section class="card">
+    <h2>今日练习</h2>
+    <div class="timer">
+      <div id="current">准备开始</div>
+      <div class="time" id="time">40</div>
+      <div class="row" style="justify-content:center">
+        <button class="mainbtn" onclick="startPause()">开始/暂停</button>
+        <button class="subbtn" onclick="nextExercise()">下一项</button>
+        <button class="subbtn" onclick="resetTimer()">重置</button>
+      </div>
+    </div>
+    <div id="list"></div>
+  </section>
+
+  <section class="card">
+    <h2>练习后记录</h2>
+    <h3>练习后疼痛/紧绷感：<span id="afterText">3</span>/10</h3>
+    <input id="after" type="range" min="0" max="10" value="3" oninput="afterText.innerText=this.value">
+    <br><br>
+    <textarea id="note" placeholder="简单记一句：今天哪里疼、练完有没有松一点、有没有久坐/受凉/搬重物。"></textarea>
+    <div class="row">
+      <button class="mainbtn" onclick="saveLog()">保存今日打卡</button>
+      <button class="danger" onclick="clearToday()">清空今日</button>
+    </div>
+    <div id="saveMsg" class="alert ok" style="display:none">已保存。今天做的是温和维护，不是硬撑。</div>
+  </section>
+
+  <section class="card">
+    <h2>坐着也能注意</h2>
+    <div class="alert ok">屁股坐满椅子，两边坐骨平均受力，别总歪向一边。</div>
+    <div class="alert ok">双脚踩地，不翘二郎腿，屏幕尽量抬高到眼睛平视附近。</div>
+    <div class="alert ok">每 30–45 分钟起身 1 分钟，走两步、耸肩、轻轻伸展。</div>
+  </section>
+
+  <section class="card">
+    <h2>我的数据</h2>
+    <div class="statbox">
+      <div class="stat"><b id="total">0</b><span class="small">总打卡</span></div>
+      <div class="stat"><b id="streak">0</b><span class="small">连续打卡</span></div>
+      <div class="stat"><b id="avg">-</b><span class="small">近7天均分</span></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>安全边界</h2>
+    <div class="alert stop">
+      练习中出现刺痛、麻、电流感，马上停。不要做深度后弯、强扭转、硬压腰背。
+      如果疼痛越来越重、夜里痛醒、腿麻腿无力、大小便异常、发热或摔伤后疼痛，请及时就医。
+    </div>
+  </section>
+</div>
+
+<script>
+const today = new Date().toISOString().slice(0,10);
+let mode = "left";
+let index = 0;
+let remain = 40;
+let running = false;
+let timer = null;
+let done = new Set();
+
+const plans = {
+  easy: {
+    hint:"今天可以做完整轻量版。动作慢一点，练完应该是松，不是累。",
+    cls:"ok",
+    items:[
+      ["腹式呼吸",45,"仰卧或坐姿，吸气时肋骨轻轻打开，呼气时肩颈放松。"],
+      ["猫牛式",50,"四肢跪姿，吸气轻抬胸，呼气慢慢拱背，幅度小一点。"],
+      ["婴儿式放松",50,"臀部往脚跟坐，手向前伸，感觉背部被温柔拉开。"],
+      ["鸟狗式",60,"对侧手脚伸出，停 2 秒，换边。骨盆别晃。"],
+      ["臀桥",50,"仰卧屈膝，慢慢抬臀，不要用腰硬顶。"],
+      ["单膝抱胸",50,"左右各做，感觉臀部和下背轻轻放松。"],
+      ["靠墙站立",60,"头顶向上长，后背轻靠墙，不要硬压。"]
+    ]
+  },
+  left: {
+    hint:"左侧更不舒服时，减少扭转，不做强拉伸，重点是呼吸、稳定和温和活动。",
+    cls:"warn",
+    items:[
+      ["热身呼吸",45,"坐姿或仰卧，呼气时想象左侧背部慢慢松下来。"],
+      ["猫牛式小幅度",45,"只做舒服范围，不追求幅度。"],
+      ["婴儿式",50,"手向前伸，背部放松，不强行歪身体。"],
+      ["鸟狗式慢速",60,"动作小一点，控制身体不摇晃。"],
+      ["臀桥",50,"用臀部发力，减少腰背代偿。"],
+      ["坐姿侧向呼吸",45,"坐直，双手摸肋骨，吸气让两侧肋骨轻轻打开。"],
+      ["靠墙站立",60,"双脚踩稳，想象头顶向上，不硬把背压直。"]
+    ]
+  },
+  sit: {
+    hint:"久坐后先做坐姿版。不用马上铺垫子，先把紧绷降下来。",
+    cls:"warn",
+    items:[
+      ["坐姿呼吸",45,"坐骨平均受力，脚踩地，吸气扩肋，呼气放松。"],
+      ["肩胛后收",40,"肩膀轻轻向后向下，停 2 秒，重复。"],
+      ["坐姿猫牛",45,"双手放大腿上，胸口轻轻打开，再慢慢圆背。"],
+      ["坐姿转头",35,"只转头不扭腰，左右慢慢看。"],
+      ["坐姿抬脚跟",40,"双脚踩地，脚跟抬起放下。"],
+      ["起身站立",60,"站起来，双脚踩稳，头顶向上，轻轻走几步。"]
+    ]
+  },
+  bad: {
+    hint:"今天明显疼，不做挑战动作。只做呼吸和轻微活动，疼痛加重就停。",
+    cls:"stop",
+    items:[
+      ["安全检查",35,"确认没有腿麻腿无力、大小便异常、发热、摔伤后疼痛。"],
+      ["舒缓呼吸",60,"坐着或躺着，吸气 3 秒，呼气 5–6 秒。"],
+      ["肩颈放松",40,"耸肩、放下，动作小一点。"],
+      ["脚踩地定位",40,"双脚踩地，感受身体被椅子支撑。"],
+      ["结束",30,"今天不硬练，可以热敷 15–20 分钟。"]
+    ]
+  }
+};
+
+function setMode(m){
+  mode=m;
+  index=0;
+  done=new Set();
+  document.querySelectorAll(".mode").forEach(b=>b.classList.remove("active"));
+  document.querySelector(`[onclick="setMode('${m}')"]`).classList.add("active");
+  hint.className="alert "+plans[m].cls;
+  hint.innerText=plans[m].hint;
+  resetTimer();
+  renderList();
+}
+
+function renderList(){
+  list.innerHTML="";
+  plans[mode].items.forEach((it,i)=>{
+    const div=document.createElement("div");
+    div.className="exercise"+(done.has(i)?" done":"");
+    div.innerHTML=`
+      <div class="num">${i+1}</div>
+      <div><b>${it[0]}</b><p class="small">${it[2]}</p></div>
+      <button class="mini" onclick="toggleDone(${i})">${done.has(i)?"已做":"打卡"}</button>
+    `;
+    list.appendChild(div);
+  });
+  updateCurrent();
+}
+
+function toggleDone(i){
+  done.has(i)?done.delete(i):done.add(i);
+  renderList();
+}
+
+function updateCurrent(){
+  const item=plans[mode].items[index];
+  current.innerText=`${index+1}/${plans[mode].items.length} ${item[0]}`;
+  time.innerText=remain;
+}
+
+function resetTimer(){
+  clearInterval(timer);
+  running=false;
+  remain=plans[mode].items[index][1];
+  updateCurrent();
+}
+
+function startPause(){
+  if(running){
+    clearInterval(timer);
+    running=false;
+    return;
+  }
+  running=true;
+  timer=setInterval(()=>{
+    remain--;
+    if(remain<=0){
+      done.add(index);
+      clearInterval(timer);
+      running=false;
+      if(index<plans[mode].items.length-1){
+        index++;
+        remain=plans[mode].items[index][1];
+      }else{
+        remain=0;
+      }
+      renderList();
+    }
+    updateCurrent();
+  },1000);
+}
+
+function nextExercise(){
+  done.add(index);
+  if(index<plans[mode].items.length-1) index++;
+  resetTimer();
+  renderList();
+}
+
+function getLogs(){
+  return JSON.parse(localStorage.getItem("backLogs")||"{}");
+}
+
+function saveLogs(logs){
+  localStorage.setItem("backLogs",JSON.stringify(logs));
+}
+
+function saveLog(){
+  const logs=getLogs();
+  logs[today]={
+    mode,
+    before:before.value,
+    after:after.value,
+    note:note.value,
+    done:[...done],
+    time:new Date().toLocaleString()
+  };
+  saveLogs(logs);
+  saveMsg.style.display="block";
+  setTimeout(()=>saveMsg.style.display="none",2500);
+  renderStats();
+}
+
+function clearToday(){
+  const logs=getLogs();
+  delete logs[today];
+  saveLogs(logs);
+  done=new Set();
+  note.value="";
+  renderList();
+  renderStats();
+}
+
+function dateAdd(d,n){
+  const x=new Date(d);
+  x.setDate(x.getDate()+n);
+  return x.toISOString().slice(0,10);
+}
+
+function renderStats(){
+  const logs=getLogs();
+  const keys=Object.keys(logs);
+  total.innerText=keys.length;
+
+  let s=0;
+  for(let i=0;i<365;i++){
+    if(logs[dateAdd(today,-i)]) s++;
+    else break;
+  }
+  streak.innerText=s;
+
+  let arr=[];
+  for(let i=0;i<7;i++){
+    const k=dateAdd(today,-i);
+    if(logs[k]) arr.push(Number(logs[k].after));
+  }
+  avg.innerText=arr.length ? (arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(1) : "-";
+}
+
+setMode("left");
+renderStats();
+</script>
+</body>
+</html>
