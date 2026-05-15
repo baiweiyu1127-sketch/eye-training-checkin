@@ -217,4 +217,266 @@
 
       <div class="grid">
         <div>
-          <
+          <label>今天身体状态</label>
+          <select id="bodyState">
+            <option value="">请选择</option>
+            <option>轻松</option>
+            <option>一般</option>
+            <option>有点累</option>
+            <option>头晕/心慌，已减量</option>
+            <option>经期/不适，休息</option>
+          </select>
+        </div>
+        <div>
+          <label>训练强度</label>
+          <select id="intensity">
+            <option value="">请选择</option>
+            <option>完整训练</option>
+            <option>只做一轮</option>
+            <option>懒人版</option>
+            <option>休息</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top:10px">
+        <label>备注</label>
+        <textarea id="note" placeholder="比如：今天臀桥还行，死虫式有点累；或者今天心率快，只做了拉伸。"></textarea>
+      </div>
+
+      <div class="grid">
+        <button onclick="save()">保存今天打卡</button>
+        <button class="secondary" onclick="lazy()">懒人版完成</button>
+      </div>
+
+      <div class="grid">
+        <button class="secondary" onclick="exportCSV()">导出记录</button>
+        <button class="secondary" onclick="clearAll()">清空记录</button>
+      </div>
+
+      <div class="warn">
+        注意：不要憋气，不要追求速度。出现心慌、明显头晕、眼前发黑、胸闷、腹痛，就停止训练。
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>最近 28 天完成率</h2>
+      <h1 id="percent">0%</h1>
+      <div class="bar"><span id="bar"></span></div>
+
+      <div class="stats">
+        <div class="stat">
+          <strong id="done">0</strong>
+          <span>完整</span>
+        </div>
+        <div class="stat">
+          <strong id="partial">0</strong>
+          <span>部分</span>
+        </div>
+        <div class="stat">
+          <strong id="streak">0</strong>
+          <span>连续</span>
+        </div>
+      </div>
+
+      <h2 style="margin-top:18px">最近 28 天</h2>
+      <div class="days" id="days"></div>
+    </div>
+
+    <div class="card">
+      <h2>每周建议安排</h2>
+      <p>
+        周一：塑形 A<br>
+        周二：前庭 + 眼睛轻训练<br>
+        周三：背部舒缓 + 散步<br>
+        周四：塑形 B<br>
+        周五：前庭 + 眼睛轻训练<br>
+        周六：轻松活动 / 散步 / 拉伸<br>
+        周日：休息
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const tasks = [
+      ["bridge", "臀桥", "12次 × 2组", "躺在垫子上，脚踩地，屁股慢慢抬起。练臀和后侧链，不要憋气。"],
+      ["deadbug", "死虫式", "8次/边 × 2组", "腰背贴近垫子，手脚慢慢交替伸展。练核心稳定，比仰卧起坐更适合你。"],
+      ["birddog", "鸟狗式", "8次/边 × 2组", "四点跪姿，对侧手脚伸直，慢慢控制。练背部和核心稳定。"],
+      ["sideleg", "侧卧抬腿", "12次/边 × 2组", "侧躺抬腿，动作慢。练臀中肌，让下半身更稳。"],
+      ["wallpush", "靠墙俯卧撑", "10次 × 2组", "面对墙，双手撑墙做俯卧撑。练肩背和上肢，不容易太累。"],
+      ["stretch", "猫牛式 + 婴儿式", "3分钟", "用于收尾放松背部，动作慢，不要压迫腹部。"]
+    ];
+
+    const storageKey = "low_burden_muscle_training_v1";
+
+    const pad = n => String(n).padStart(2, "0");
+
+    const dateKey = d => {
+      return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+    };
+
+    const today = () => dateKey(new Date());
+
+    function all() {
+      return JSON.parse(localStorage.getItem(storageKey) || "{}");
+    }
+
+    function setAll(data) {
+      localStorage.setItem(storageKey, JSON.stringify(data));
+    }
+
+    function render() {
+      const d = new Date();
+      document.getElementById("date").textContent =
+        d.getFullYear() + "年" + (d.getMonth() + 1) + "月" + d.getDate() + "日";
+
+      const record = all()[today()] || {};
+
+      document.getElementById("tasks").innerHTML = tasks.map(t => `
+        <div class="task">
+          <input type="checkbox" id="${t[0]}" ${record.items && record.items[t[0]] ? "checked" : ""}>
+          <div>
+            <b>${t[1]}</b>
+            <div class="desc">${t[3]}</div>
+          </div>
+          <div class="time">${t[2]}</div>
+        </div>
+      `).join("");
+
+      document.getElementById("bodyState").value = record.bodyState || "";
+      document.getElementById("intensity").value = record.intensity || "";
+      document.getElementById("note").value = record.note || "";
+
+      document.getElementById("status").textContent =
+        record.type === "done" ? "今日已完整完成" :
+        record.type === "partial" ? "今日已部分完成" :
+        "未打卡";
+
+      summary();
+    }
+
+    function collect(typeOverride) {
+      const items = {};
+      tasks.forEach(t => {
+        items[t[0]] = document.getElementById(t[0]).checked;
+      });
+
+      const count = Object.values(items).filter(Boolean).length;
+
+      let type = typeOverride;
+      if (!type) {
+        if (count === tasks.length) type = "done";
+        else if (count > 0) type = "partial";
+        else type = "none";
+      }
+
+      return {
+        date: today(),
+        type,
+        items,
+        count,
+        bodyState: document.getElementById("bodyState").value,
+        intensity: document.getElementById("intensity").value,
+        note: document.getElementById("note").value,
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    function save(typeOverride) {
+      const data = all();
+      data[today()] = collect(typeOverride);
+      setAll(data);
+      render();
+      alert("已保存");
+    }
+
+    function lazy() {
+      tasks.forEach(t => {
+        document.getElementById(t[0]).checked =
+          ["bridge", "deadbug", "birddog"].includes(t[0]);
+      });
+      document.getElementById("intensity").value = "懒人版";
+      save("partial");
+    }
+
+    function summary() {
+      const data = all();
+      const arr = [];
+      const now = new Date();
+
+      for (let i = 27; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(now.getDate() - i);
+        const k = dateKey(d);
+        arr.push({ key: k, date: d, record: data[k] });
+      }
+
+      const done = arr.filter(x => x.record && x.record.type === "done").length;
+      const partial = arr.filter(x => x.record && x.record.type === "partial").length;
+      const percent = Math.round((done + partial * 0.6) / 28 * 100);
+
+      document.getElementById("done").textContent = done;
+      document.getElementById("partial").textContent = partial;
+      document.getElementById("percent").textContent = percent + "%";
+      document.getElementById("bar").style.width = percent + "%";
+
+      let streak = 0;
+      for (let i = arr.length - 1; i >= 0; i--) {
+        const type = arr[i].record && arr[i].record.type;
+        if (type === "done" || type === "partial") streak++;
+        else break;
+      }
+      document.getElementById("streak").textContent = streak;
+
+      document.getElementById("days").innerHTML = arr.map(x => {
+        const type = x.record && x.record.type;
+        const cls = type === "done" ? "done" : type === "partial" ? "partial" : "";
+        const mark = type === "done" ? "✓" : type === "partial" ? "•" : "";
+        return `
+          <div class="day ${cls}">
+            <span>${x.date.getMonth() + 1}/${x.date.getDate()}</span>
+            <b>${mark}</b>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function exportCSV() {
+      const data = all();
+      const rows = [["日期", "状态", "完成项目数", "身体状态", "训练强度", "备注", "更新时间"]];
+
+      Object.values(data)
+        .sort((a, b) => a.date.localeCompare(b.date))
+        .forEach(r => {
+          rows.push([
+            r.date,
+            r.type,
+            r.count,
+            r.bodyState,
+            r.intensity,
+            r.note,
+            r.updatedAt
+          ]);
+        });
+
+      const csv = "\ufeff" + rows.map(row =>
+        row.map(v => `"${String(v || "").replace(/"/g, '""')}"`).join(",")
+      ).join("\n");
+
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+      a.download = "低负担肌肉训练记录.csv";
+      a.click();
+    }
+
+    function clearAll() {
+      if (confirm("确定清空所有记录吗？")) {
+        localStorage.removeItem(storageKey);
+        render();
+      }
+    }
+
+    render();
+  </script>
+</body>
+</html>
