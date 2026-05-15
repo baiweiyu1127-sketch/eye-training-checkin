@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>低负担肌肉训练打卡</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #f7f2ec;
+      color: #2d2723;
+    }
+    .wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 18px 14px 50px;
+    }
+    h1 {
+      margin: 10px 0 6px;
+      font-size: 28px;
+    }
+    p {
+      color: #7a6b61;
+      line-height: 1.65;
+    }
+    .card {
+      background: #fffaf5;
+      border: 1px solid #e3d7cb;
+      border-radius: 20px;
+      box-shadow: 0 10px 24px rgba(80,55,38,.08);
+      padding: 16px;
+      margin: 14px 0;
+    }
+    .top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+    .pill {
+      border-radius: 999px;
+      background: #f0e4d8;
+      color: #684b3c;
+      padding: 7px 12px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .task {
+      display: grid;
+      grid-template-columns: 30px 1fr auto;
+      gap: 10px;
+      border-top: 1px solid #e3d7cb;
+      padding: 13px 0;
+      align-items: start;
+    }
+    .task:first-child {
+      border-top: 0;
+    }
+    input[type="checkbox"] {
+      width: 22px;
+      height: 22px;
+      accent-color: #9a6a4d;
+      margin-top: 2px;
+    }
+    b {
+      display: block;
+      margin-bottom: 4px;
+    }
+    .desc {
+      font-size: 14px;
+      color: #7a6b61;
+      line-height: 1.55;
+    }
+    .time {
+      font-size: 12px;
+      background: #f0e4d8;
+      border-radius: 999px;
+      padding: 6px 8px;
+      color: #654b3d;
+      white-space: nowrap;
+    }
+    label {
+      font-size: 13px;
+      color: #7a6b61;
+      display: block;
+      margin-bottom: 6px;
+    }
+    select, textarea, button {
+      width: 100%;
+      font: inherit;
+      border: 1px solid #e3d7cb;
+      border-radius: 14px;
+      padding: 11px;
+      background: #fffdf9;
+      color: #2d2723;
+      box-sizing: border-box;
+    }
+    textarea {
+      min-height: 76px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+    button {
+      background: #9a6a4d;
+      color: white;
+      border: 0;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    button.secondary {
+      background: #f0e4d8;
+      color: #654b3d;
+      border: 1px solid #e3d7cb;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    @media (max-width: 520px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .bar {
+      height: 14px;
+      background: #eaded4;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .bar span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: #9a6a4d;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .stat {
+      background: #fffdf9;
+      border: 1px solid #e3d7cb;
+      border-radius: 16px;
+      padding: 10px;
+    }
+    .stat strong {
+      font-size: 24px;
+      display: block;
+    }
+    .stat span {
+      font-size: 12px;
+      color: #7a6b61;
+    }
+    .days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .day {
+      height: 48px;
+      border-radius: 13px;
+      border: 1px solid #e3d7cb;
+      background: #fffdf9;
+      font-size: 12px;
+      color: #7a6b61;
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .done {
+      background: #edf5ee;
+      border-color: #c7dfcc;
+      color: #416849;
+    }
+    .partial {
+      background: #fff4dd;
+      border-color: #e7c994;
+      color: #7a5720;
+    }
+    .warn {
+      background: #fff2eb;
+      border: 1px solid #e8c5b7;
+      border-radius: 16px;
+      padding: 12px;
+      color: #7f3d2f;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <h1>低负担肌肉训练打卡</h1>
+    <p>
+      每周 3 次，每次 15—20 分钟。适合低强度塑形：练臀、背、核心稳定，让身体更紧致，但不追求猛练。
+    </p>
+
+    <div class="card">
+      <div class="top">
+        <div>
+          <h2 style="margin:0 0 6px">今天训练</h2>
+          <p id="date" style="margin:0"></p>
+        </div>
+        <div class="pill" id="status">未打卡</div>
+      </div>
+
+      <div id="tasks"></div>
+
+      <div class="grid">
+        <div>
+          <
